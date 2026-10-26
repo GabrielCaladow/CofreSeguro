@@ -1,1 +1,1 @@
-<!-- Responsável: João Henrique | Função: Manual do usuário, explicação dos critérios de segurança e resposta teórica obrigatória. -->
+<!-- Responsável: Heitor | Manual do usuário. A seção de critérios de segurança é escrita por João Henrique e Raul. -->
