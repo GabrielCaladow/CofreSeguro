@@ -8,4 +8,3 @@ def agora_texto ( ):
 def dias_desde (data_texto):
     data = datetime.strptime(data_texto[:10], "%Y-%m-%d").date()
     return (date.today() - data).days
-
