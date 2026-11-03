@@ -5,6 +5,12 @@ def menu_principal(opcao):
     while True:
         opcao = int(input("1. Credenciais (listar mascarado / adicionar / editar / excluir / revelar senha)\n2. Categorias (listar / cadastrar)\n3. Gerar senha forte\n4. Relatório de segurança\n5. Log de auditoria\n6. Perguntar à IA  (reservado para o módulo da aula)\n0. Sair\n\nDigite o número da opção desejada: "))
 
+os.system("cls")
+
+def menu_principal(opcao):
+    while True:
+        opcao = int(input("1. Credenciais (listar mascarado / adicionar / editar / excluir / revelar senha)\n2. Categorias (listar / cadastrar)\n3. Gerar senha forte\n4. Relatório de segurança\n5. Log de auditoria\n6. Perguntar à IA  (reservado para o módulo da aula)\n0. Sair\n\nDigite o número da opção desejada: "))
+
         if opcao == 0:
             print("Saindo...")
             break
