@@ -4,6 +4,19 @@ import os
 import string
 os.system("cls")
 
+def verificador_maiusculas (senha_cadastrada):
+    return any(letra.isupper() for letra in senha_cadastrada)
+
+def verificador_tamanho (senha_cadastrada):
+    return len(senha_cadastrada) >= 14
+
+def verificador_numeros (senha_cadastrada):
+    return any(digitos.isdigit() for digitos in senha_cadastrada)
+
+def verificador_pontuacao (senha_cadastrada):
+    return any(caracteres_especiais in string.punctuation for caracteres_especiais in senha_cadastrada )
+
+
 senha_cadastrada = str(input("Digite a senha para análise: "))
 senhas_comuns = open("senhas_comuns.txt", "r", encoding="utf8") 
 
@@ -12,13 +25,12 @@ if senha_cadastrada in senhas_comuns.read():
 
 else:
 
+    possui_maiuscula = verificador_maiusculas (senha_cadastrada)
+    possui_caracteres_especiais = verificador_pontuacao (senha_cadastrada)
+    possui_numeros = verificador_numeros (senha_cadastrada)
+    possui_tamanho_minimo = verificador_tamanho (senha_cadastrada)
 
-    caracteres_senha = len(senha_cadastrada) >= 14
-    maiusculas_senha = any(letra.isupper() for letra in senha_cadastrada)
-    digitos_senha = any(digitos.isdigit() for digitos in senha_cadastrada)
-    pontuacao_senha = any(caracteres_especiais in string.punctuation for caracteres_especiais in senha_cadastrada )
-
-if all([caracteres_senha, maiusculas_senha, digitos_senha, pontuacao_senha]):
+if all([possui_maiuscula, possui_caracteres_especiais, possui_numeros, possui_tamanho_minimo]):
     print("Senha segura!!")
 
 
