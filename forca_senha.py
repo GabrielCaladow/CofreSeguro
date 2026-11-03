@@ -4,13 +4,6 @@ import os
 import string
 os.system("cls")
 
-tamanho_senha = False
-caracteres_senha = False
-maisculas_senha = False
-digitos_senha = False
-pontuacao_senha = False
-
-
 senha_cadastrada = str(input("Digite a senha para análise: "))
 senha_separada = list(senha_cadastrada)
 senhas_comuns = open("senhas_comuns.txt", "r", encoding="utf8") 
