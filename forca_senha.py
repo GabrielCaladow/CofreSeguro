@@ -20,30 +20,19 @@ if senha_cadastrada in senhas_comuns.read():
 
 else:
 
-    if len(senha_cadastrada) >= 14:
 
-        caracteres_senha = True
-    
-    for letra_maiuscula in string.ascii_uppercase:
+    caracteres_senha = len(senha_cadastrada) >= 14
+    maiusculas_senha = any(letra.isupper() for letra in senha_cadastrada)
+    digitos_senha = any(digitos.isdigit() for digitos in senha_cadastrada)
+    pontuacao_senha = any(caracteres_especiais in string.punctuation for caracteres_especiais in senha_cadastrada )
 
-        if  letra_maiuscula in senha_separada:
-            
-            maisculas_senha = True
+if all([caracteres_senha, maiusculas_senha, digitos_senha, pontuacao_senha]):
+    print("Senha segura!!")
 
-    for digitos in string.digits:
-        
-        if digitos in senha_separada:
-            
-            digitos_senha = True
 
-    for pontuacao in string.punctuation:
-        
-        if pontuacao in senha_separada:
-            
-            pontuacao_senha = True
 
-    if maisculas_senha == True and digitos_senha == True and pontuacao_senha == True and caracteres_senha == True:
-        print("Senha segura!!")
+
+
 
 
 
