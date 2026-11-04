@@ -2,64 +2,62 @@
 # Detalhes em ARQUITETURA.md.
 import os
 import string
-os.system("cls")
 
-contador_true = 0
-categoria = ["Senha Fraca!!", "Senha Média!!", "Senha Forte!!", "Senha muito forte!!"]
+categorias = ["Senha muito fraca!!", "Senha Fraca!!", "Senha Média!!", "Senha Forte!!", "Senha muito forte!!"]
 
-with open("senhas_comuns.txt", "r", encoding="utf8") as senhas_comuns, \
-    open("senhas_salvas.txt", "r", encoding="utf8") as senha:
 
-    def verificador_maiusculas (senha_cadastrada):
-        return any(letra.isupper() for letra in senha_cadastrada)
+def verificador_maiusculas(senha):
+    return any(letra.isupper() for letra in senha)
 
-    def verificador_tamanho (senha_cadastrada):
-        return len(senha_cadastrada) >= 14
 
-    def verificador_numeros (senha_cadastrada):
-        return any(digitos.isdigit() for digitos in senha_cadastrada)
+def verificador_tamanho(senha):
+    return len(senha) >= 14
 
-    def verificador_pontuacao (senha_cadastrada):
-        return any(caracteres_especiais in string.punctuation for caracteres_especiais in senha_cadastrada )
 
-    def carregar_lista(caminho):
+def verificador_numeros(senha):
+    return any(caractere.isdigit() for caractere in senha)
+
+
+def verificador_pontuacao(senha):
+    return any(caractere in string.punctuation for caractere in senha)
+
+
+def carregar_lista(caminho):
+    try:
         with open(caminho, "r", encoding="utf8") as arquivo:
-            return {linha.strip() for linha in arquivo}
-
-    def marca(ok):
-        return "✅" if ok else "❌"
-    
-    def main(categoria):
-        
-        os.system("cls")
-
-        senha = str(input("Escreva a sua senha: "))
-        senhas_comuns = carregar_lista("senhas_comuns.txt")
-
-        if senha in senhas_comuns:
-            print("Senha fraca (está presente no arquivo de senhas comuns)")
-            return
-
-        criterios = {
-            "Tamanho": verificador_tamanho(senha),
-            "Letras maiúsculas": verificador_maiusculas(senha),
-            "Caracteres especiais": verificador_pontuacao(senha),
-            "Números": verificador_numeros(senha),
-        }
-
-        pontos = sum(criterios.values())  # True conta como 1
-        print(categoria[pontos])
-
-        for nome, ok in criterios.items():
-            print(f"{nome} - {marca(ok)}")
+            return {linha.strip().lower() for linha in arquivo}
+    except FileNotFoundError:
+        print(f"Aviso: arquivo '{caminho}' não encontrado. Pulando a checagem de senhas comuns.")
+        return set()
 
 
-main(categoria)
+def marca(ok):
+    return "✅" if ok else "❌"
 
 
+def main():
+    os.system("cls" if os.name == "nt" else "clear")
+
+    senha = input("Escreva a sua senha: ")
+    senhas_comuns = carregar_lista("senhas_comuns.txt")
+
+    if senha.lower() in senhas_comuns:
+        print("Senha fraca (está presente no arquivo de senhas comuns)")
+        return
+
+    criterios = {
+        "Tamanho": verificador_tamanho(senha),
+        "Letras maiúsculas": verificador_maiusculas(senha),
+        "Caracteres especiais": verificador_pontuacao(senha),
+        "Números": verificador_numeros(senha),
+    }
+
+    pontos = sum(criterios.values())  # True conta como 1
+    print(categorias[pontos])
+
+    for nome, ok in criterios.items():
+        print(f"{nome} - {marca(ok)}")
 
 
-
-
-
-
+if __name__ == "__main__":
+    main()
