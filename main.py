@@ -1,11 +1,7 @@
 # Responsável: Heitor | Função 1 (Interface e Integração): menu principal, submenus, telas e chamada dos outros módulos.
 # Regra: só este arquivo e entrada.py usam print()/input(). Detalhes em ARQUITETURA.md.
 
-def menu_principal(opcao):
-    while True:
-        opcao = int(input("1. Credenciais (listar mascarado / adicionar / editar / excluir / revelar senha)\n2. Categorias (listar / cadastrar)\n3. Gerar senha forte\n4. Relatório de segurança\n5. Log de auditoria\n6. Perguntar à IA  (reservado para o módulo da aula)\n0. Sair\n\nDigite o número da opção desejada: "))
-
-os.system("cls")
+import os
 
 def menu_principal(opcao):
     while True:
