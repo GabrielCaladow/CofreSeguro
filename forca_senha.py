@@ -4,6 +4,9 @@ import os
 import string
 os.system("cls")
 
+contador_true = 0
+categoria = ["Senha Fraca!!", "Senha Média!!", "Senha Forte!!", "Senha muito forte!!"]
+
 with open("senhas_comuns.txt", "r", encoding="utf8") as senhas_comuns, \
     open("senhas_salvas.txt", "r", encoding="utf8") as senhas_cadastradas:
 
@@ -36,8 +39,25 @@ with open("senhas_comuns.txt", "r", encoding="utf8") as senhas_comuns, \
         possui_numeros = verificador_numeros (senha_cadastrada)
         possui_tamanho_minimo = verificador_tamanho (senha_cadastrada)
 
-    if all([possui_maiuscula, possui_caracteres_especiais, possui_numeros, possui_tamanho_minimo]):
-        print("Senha segura!!")
+        check = [possui_maiuscula, possui_caracteres_especiais, possui_numeros, possui_tamanho_minimo]
+
+        for i in check:
+            if i == True:
+                emoji = "✅"
+                contador_true+=1
+            elif i == False:
+                emoji = "❌"
+
+        for i in range(len(check)+1):   
+            if contador_true == i:
+                print(f"{categoria[i-1]}")
+                print(f"Tamanho - {emoji}")
+                print(f"Letras maiúsculas - {emoji}")
+                print(f"Caractéres especiais - {emoji}")
+                print(f"Números - {emoji}")
+
+
+    
 
 
 
