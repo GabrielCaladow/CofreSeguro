@@ -8,9 +8,7 @@ contador_true = 0
 categoria = ["Senha Fraca!!", "Senha Média!!", "Senha Forte!!", "Senha muito forte!!"]
 
 with open("senhas_comuns.txt", "r", encoding="utf8") as senhas_comuns, \
-    open("senhas_salvas.txt", "r", encoding="utf8") as senhas_cadastradas:
-
-    senha_cadastrada = str(input("Escreva a sua senha: "))
+    open("senhas_salvas.txt", "r", encoding="utf8") as senha:
 
     def verificador_maiusculas (senha_cadastrada):
         return any(letra.isupper() for letra in senha_cadastrada)
@@ -24,40 +22,39 @@ with open("senhas_comuns.txt", "r", encoding="utf8") as senhas_comuns, \
     def verificador_pontuacao (senha_cadastrada):
         return any(caracteres_especiais in string.punctuation for caracteres_especiais in senha_cadastrada )
 
-    lista_senhas_cadastradas = senhas_cadastradas.readlines()
+    def carregar_lista(caminho):
+        with open(caminho, "r", encoding="utf8") as arquivo:
+            return {linha.strip() for linha in arquivo}
 
-    remocao_espacamento = [n.replace("\n", "") for n in lista_senhas_cadastradas]
-
-    if senha_cadastrada in senhas_comuns.read():
-        
-        print("Senha fraca(está presente no arquivo de senhas comuns)")
-
-    else:
-
-        possui_maiuscula = verificador_maiusculas (senha_cadastrada)
-        possui_caracteres_especiais = verificador_pontuacao (senha_cadastrada)
-        possui_numeros = verificador_numeros (senha_cadastrada)
-        possui_tamanho_minimo = verificador_tamanho (senha_cadastrada)
-
-        check = [possui_maiuscula, possui_caracteres_especiais, possui_numeros, possui_tamanho_minimo]
-
-        for i in check:
-            if i == True:
-                emoji = "✅"
-                contador_true+=1
-            elif i == False:
-                emoji = "❌"
-
-        for i in range(len(check)+1):   
-            if contador_true == i:
-                print(f"{categoria[i-1]}")
-                print(f"Tamanho - {emoji}")
-                print(f"Letras maiúsculas - {emoji}")
-                print(f"Caractéres especiais - {emoji}")
-                print(f"Números - {emoji}")
-
-
+    def marca(ok):
+        return "✅" if ok else "❌"
     
+    def main(categoria):
+        
+        os.system("cls")
+
+        senha = str(input("Escreva a sua senha: "))
+        senhas_comuns = carregar_lista("senhas_comuns.txt")
+
+        if senha in senhas_comuns:
+            print("Senha fraca (está presente no arquivo de senhas comuns)")
+            return
+
+        criterios = {
+            "Tamanho": verificador_tamanho(senha),
+            "Letras maiúsculas": verificador_maiusculas(senha),
+            "Caracteres especiais": verificador_pontuacao(senha),
+            "Números": verificador_numeros(senha),
+        }
+
+        pontos = sum(criterios.values())  # True conta como 1
+        print(categoria[pontos])
+
+        for nome, ok in criterios.items():
+            print(f"{nome} - {marca(ok)}")
+
+
+main(categoria)
 
 
 
