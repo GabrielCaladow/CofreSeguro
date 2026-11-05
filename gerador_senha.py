@@ -1,5 +1,4 @@
 # Responsável: Raul | Função 3 (Força de Senha): gerador de senhas fortes (funcionalidade extra).
-# Detalhes em ARQUITETURA.md.
 opcao=int(input("1-para senha aleatoria com palavra chave \n2-para senha 100%. aleatoria\nEscolha: "))
 if opcao==2:
     import random, string
