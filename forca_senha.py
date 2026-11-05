@@ -89,5 +89,37 @@ def main():
 
     print(f"\nExplicação: {explicacao}")
 
+
+def obter_nivel_senha(senha):
+    pontos, criterios, explicacao = avaliar_senha(senha)
+
+    # Senhas comuns sempre são consideradas muito fracas.
+    if "Senha comum" in criterios:
+        return 0
+
+    # A classificação máxima é 4.
+    return min(pontos, 4)
+
+
+def senha_atende_categoria(senha, forca_minima):
+    nivel_senha = obter_nivel_senha(senha)
+
+    return nivel_senha >= int(forca_minima)
+
+def verificar_forca_categoria(senha, forca_minima):
+    pontos, criterios, explicacao = avaliar_senha(senha)
+
+    if "Senha comum" in criterios:
+        return False, pontos, explicacao
+
+    if pontos < forca_minima:
+        explicacao += (
+            f" A senha não atingiu a força mínima "
+            f"exigida pela categoria ({forca_minima})."
+        )
+        return False, pontos, explicacao
+
+    return True, pontos, explicacao
+
 if __name__ == "__main__":
     main()
