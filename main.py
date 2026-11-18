@@ -1,4 +1,3 @@
-
 # Responsável: Heitor | Função 1 (Interface e Integração)
 # Menu principal, submenus, telas e chamada dos outros módulos.
 
@@ -22,6 +21,17 @@ from categorias import (
 from forca_senha import (
     avaliar_senha,
     classificar_senha
+)
+
+from auditoria import (
+    registrar_operacao,
+    consultar_log,
+    formatar_log,
+    OP_ADICIONAR,
+    OP_EDITAR,
+    OP_EXCLUIR,
+    OP_REVELAR,
+    OP_CADASTRAR_CATEGORIA
 )
 
 
@@ -147,6 +157,8 @@ def menu_credenciais():
                 observacoes
             )
 
+            registrar_operacao(OP_ADICIONAR, servico)
+
             print("\nCredencial adicionada com sucesso!")
 
             pausar()
@@ -193,6 +205,8 @@ def menu_credenciais():
                     novas_observacoes
                 )
 
+                registrar_operacao(OP_EDITAR, servico)
+
                 print("\nCredencial editada com sucesso!")
 
             pausar()
@@ -205,6 +219,7 @@ def menu_credenciais():
             resultado = excluir_credencial(servico)
 
             if resultado:
+                registrar_operacao(OP_EXCLUIR, servico)
                 print("\nCredencial excluída com sucesso!")
 
             else:
@@ -218,6 +233,9 @@ def menu_credenciais():
             )
 
             credencial = buscar_credencial(servico)
+
+            if credencial is not None:
+                registrar_operacao(OP_REVELAR, credencial["servico"])
 
             exibir_credencial(
                 credencial,
@@ -292,6 +310,8 @@ def menu_categorias():
                     )
 
                 else:
+                    registrar_operacao(OP_CADASTRAR_CATEGORIA, nome)
+
                     print(
                         "\nCategoria cadastrada com sucesso!"
                     )
@@ -306,6 +326,45 @@ def menu_categorias():
         else:
             print("\nOpção inválida!")
 
+            pausar()
+
+
+def menu_auditoria():
+    while True:
+        limpar_tela()
+
+        print("===== LOG DE AUDITORIA =====")
+        print("1. Ver log completo")
+        print("2. Filtrar por operação")
+        print("3. Filtrar por serviço")
+        print("0. Voltar")
+
+        opcao = input("\nEscolha uma opção: ")
+
+        if opcao == "0":
+            break
+
+        elif opcao == "1":
+            print()
+            print(formatar_log(consultar_log()))
+            pausar()
+
+        elif opcao == "2":
+            filtro = input(
+                "Operação (ex.: REVELAR, EXCLUIR, ADICIONAR): "
+            )
+            print()
+            print(formatar_log(consultar_log(filtro_operacao=filtro)))
+            pausar()
+
+        elif opcao == "3":
+            filtro = input("Nome do serviço: ")
+            print()
+            print(formatar_log(consultar_log(filtro_servico=filtro)))
+            pausar()
+
+        else:
+            print("\nOpção inválida!")
             pausar()
 
 
@@ -347,9 +406,7 @@ def menu_principal():
             pausar()
 
         elif opcao == "5":
-            limpar_tela()
-            print("Log de auditoria em construção...")
-            pausar()
+            menu_auditoria()
 
         elif opcao == "6":
             limpar_tela()
