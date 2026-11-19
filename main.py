@@ -39,6 +39,8 @@ from gerador_senha import (
     gerar_senha_palavra
 )
 
+from relatorio import relatorio_de_seguranca
+
 def limpar_tela():
     os.system("cls" if os.name == "nt" else "clear")
 
@@ -386,6 +388,27 @@ def menu_gerador_senha():
             print("opção invalida!")
         pausar()
 
+def menu_relatorio():
+    while True:
+        limpar_tela()
+        print("===== RELATÓRIO DE SEGURANÇA =====")
+        print("1. Ver relatório")
+        print("0. Voltar")
+
+        opcao = input("\nEscolha uma opção: ")
+
+        if opcao == "0":
+            break
+
+        elif opcao == "1":
+            print()
+            print(relatorio_de_seguranca())
+            pausar()
+
+        else:
+            print("\nOpção inválida!")
+            pausar()
+
 def menu_principal():
     while True:
         limpar_tela()
@@ -417,10 +440,8 @@ def menu_principal():
             menu_gerador_senha()
 
         elif opcao == "4":
-            limpar_tela()
-            print("Relatório de segurança em construção...")
-            pausar()
-
+            menu_relatorio()
+            
         elif opcao == "5":
             menu_auditoria()
 
@@ -432,7 +453,6 @@ def menu_principal():
         else:
             print("\nOpção inválida!")
             pausar()
-
 
 while True:
     app = input(
