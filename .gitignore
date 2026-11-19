@@ -1,1 +1,11 @@
 *.pyc
+__pycache__/
+
+# chave da Groq: cada um tem a sua, nunca sobe para o GitHub
+.env
+
+# credenciais, categorias e log gerados pelo programa
+dados/
+
+# arquivo criado quando se roda "python agente.py"
+teste_agente.csv

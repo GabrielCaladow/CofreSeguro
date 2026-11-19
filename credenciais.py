@@ -5,6 +5,17 @@ from tempo import agora_texto
 def adicionar_credencial(servico, usuario, senha, categoria, observacoes=""):
     credenciais = carregar_credenciais()
 
+    servico = servico.strip()
+
+    if not servico:
+        return None
+
+    # O serviço funciona como identificador: buscar, editar e excluir procuram
+    # por ele. Se existissem dois iguais, só o primeiro seria alcançado.
+    for credencial in credenciais:
+        if credencial["servico"].lower() == servico.lower():
+            return None
+
     credencial = {
         "servico": servico,
         "usuario": usuario,
@@ -70,4 +81,5 @@ def excluir_credencial(servico):
 
 
 def mascarar_senha(senha):
+    # o max evita número negativo de asteriscos em senhas com menos de 2 letras
     return senha[:2] + "*" * max(0, len(senha) - 2)

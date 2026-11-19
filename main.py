@@ -15,12 +15,14 @@ from credenciais import (
 from categorias import (
     cadastrar_categoria,
     listar_categorias,
-    buscar_categoria
+    buscar_categoria,
+    criar_categorias_padrao
 )
 
 from forca_senha import (
     avaliar_senha,
-    classificar_senha
+    classificar_senha,
+    senha_atende_categoria
 )
 
 from auditoria import (
@@ -31,7 +33,10 @@ from auditoria import (
     OP_EDITAR,
     OP_EXCLUIR,
     OP_REVELAR,
-    OP_CADASTRAR_CATEGORIA
+    OP_CADASTRAR_CATEGORIA,
+    OP_GERAR_SENHA,
+    OP_GERAR_RELATORIO,
+    OP_PERGUNTAR_IA
 )
 
 from gerador_senha import (
@@ -39,7 +44,9 @@ from gerador_senha import (
     gerar_senha_palavra
 )
 
-from relatorio import relatorio_de_seguranca
+from relatorio import relatorio_de_seguranca, montar_dados_ia
+
+from agente import falar_com_agente_texto
 
 def limpar_tela():
     os.system("cls" if os.name == "nt" else "clear")
@@ -47,6 +54,40 @@ def limpar_tela():
 
 def pausar():
     input("\nPressione ENTER para continuar...")
+
+
+def ler_senha(mensagem):
+    # A senha não pode ser "limpa" na hora de salvar como os outros campos,
+    # senão o usuário cadastraria uma senha e o arquivo guardaria outra.
+    # Por isso o ";" é recusado já na digitação.
+    while True:
+        senha = input(mensagem)
+
+        if not senha:
+            print("A senha não pode ficar vazia.")
+
+        elif ";" in senha:
+            print("A senha não pode ter ';' (é o separador do arquivo).")
+
+        else:
+            return senha
+
+
+def ler_categoria(mensagem):
+    # Só aceita categoria cadastrada, porque é dela que vem a força mínima.
+    while True:
+        nome_categoria = input(mensagem)
+        categoria = buscar_categoria(nome_categoria)
+
+        if categoria is not None:
+            return categoria["nome"]
+
+        nomes = []
+
+        for categoria in listar_categorias():
+            nomes.append(categoria["nome"])
+
+        print(f"Categoria não cadastrada. Opções: {', '.join(nomes)}")
 
 
 def exibir_credencial(credencial, revelar=False):
@@ -70,13 +111,6 @@ def exibir_credencial(credencial, revelar=False):
 def analisar_senha_categoria(senha, nome_categoria):
     categoria = buscar_categoria(nome_categoria)
 
-    if categoria is None:
-        print(
-            f"\nA categoria '{nome_categoria}' não está cadastrada. "
-            "Não foi possível verificar a força mínima da senha."
-        )
-        return False
-
     pontos, criterios, explicacao = avaliar_senha(senha)
     nivel = classificar_senha(senha)
 
@@ -93,15 +127,13 @@ def analisar_senha_categoria(senha, nome_categoria):
 
     print(f"\nExplicação: {explicacao}")
 
-    forca_minima = int(categoria["forca_minima"])
-
     if "Senha comum" in criterios:
         print(
             "\nAVISO: Essa senha está presente na lista "
             "de senhas comuns."
         )
 
-    elif pontos < forca_minima:
+    elif not senha_atende_categoria(senha, categoria["forca_minima"]):
         print(
             f"\nAVISO: A senha não atende à exigência mínima "
             f"da categoria {categoria['nome']}."
@@ -112,8 +144,6 @@ def analisar_senha_categoria(senha, nome_categoria):
             f"\nA senha atende à exigência mínima "
             f"da categoria {categoria['nome']}."
         )
-
-    return True
 
 
 def menu_credenciais():
@@ -149,13 +179,13 @@ def menu_credenciais():
         elif opcao == "2":
             servico = input("Nome do serviço: ")
             usuario = input("Usuário ou e-mail: ")
-            senha = input("Senha: ")
-            categoria = input("Categoria: ")
+            senha = ler_senha("Senha: ")
+            categoria = ler_categoria("Categoria: ")
             observacoes = input("Observações: ")
 
             analisar_senha_categoria(senha, categoria)
 
-            adicionar_credencial(
+            credencial = adicionar_credencial(
                 servico,
                 usuario,
                 senha,
@@ -163,9 +193,16 @@ def menu_credenciais():
                 observacoes
             )
 
-            registrar_operacao(OP_ADICIONAR, servico)
+            if credencial is None:
+                print(
+                    "\nNão foi possível adicionar. O nome do serviço "
+                    "está vazio ou já existe uma credencial com ele."
+                )
 
-            print("\nCredencial adicionada com sucesso!")
+            else:
+                registrar_operacao(OP_ADICIONAR, credencial["servico"])
+
+                print("\nCredencial adicionada com sucesso!")
 
             pausar()
 
@@ -194,8 +231,8 @@ def menu_credenciais():
                 print("\nDigite os novos dados:")
 
                 novo_usuario = input("Novo usuário ou e-mail: ")
-                nova_senha = input("Nova senha: ")
-                nova_categoria = input("Nova categoria: ")
+                nova_senha = ler_senha("Nova senha: ")
+                nova_categoria = ler_categoria("Nova categoria: ")
                 novas_observacoes = input("Novas observações: ")
 
                 analisar_senha_categoria(
@@ -377,12 +414,15 @@ def menu_gerador_senha():
     while True:
         limpar_tela()
         print("========== GERADOR DE SENHA ==========")
-        opcao=int(input("1. Senha aleatoria com palavra chave \n2. Senha 100%. aleatoria\n0. Voltar \nEscolha uma opção: "))
-        if opcao==2:
+        # compara como texto: com int(input()) qualquer letra derrubava o programa
+        opcao=input("1. Senha aleatoria com palavra chave \n2. Senha 100%. aleatoria\n0. Voltar \nEscolha uma opção: ")
+        if opcao=="2":
             gerar_senha_aleatoria()
-        elif opcao==1:
+            registrar_operacao(OP_GERAR_SENHA)
+        elif opcao=="1":
             gerar_senha_palavra()
-        elif opcao == 0:
+            registrar_operacao(OP_GERAR_SENHA)
+        elif opcao == "0":
             break
         else:
             print("opção invalida!")
@@ -403,13 +443,71 @@ def menu_relatorio():
         elif opcao == "1":
             print()
             print(relatorio_de_seguranca())
+            registrar_operacao(OP_GERAR_RELATORIO)
             pausar()
 
         else:
             print("\nOpção inválida!")
             pausar()
 
+def menu_ia():
+    limpar_tela()
+    print("===== PERGUNTAR À IA =====")
+
+    credenciais = listar_credenciais()
+
+    if not credenciais:
+        print("\nCadastre alguma credencial antes de perguntar à IA.")
+        pausar()
+        return
+
+    print("\nA IA recebe apenas: serviço, categoria, força da senha, se a senha")
+    print("é comum, com quais serviços ela se repete e há quantos dias não muda.")
+    print("Senhas, usuários e observações NÃO são enviados.")
+
+    confirmacao = input(
+        "\nSeus dados vão sair do computador. Continuar? (s/n): "
+    ).strip().lower()
+
+    if confirmacao != "s":
+        print("\nConsulta cancelada.")
+        pausar()
+        return
+
+    pergunta = input(
+        "\nO que você quer perguntar sobre suas credenciais? > "
+    ).strip()
+
+    if not pergunta:
+        print("\nNenhuma pergunta foi digitada.")
+        pausar()
+        return
+
+    # Registra antes de enviar: se a consulta falhar no meio do caminho,
+    # o log ainda mostra que alguém tentou mandar os dados para fora.
+    registrar_operacao(OP_PERGUNTAR_IA, "-", pergunta)
+
+    # O agente já trata falta de chave, falta da biblioteca groq e erro de
+    # internet: nesses casos ele mostra o motivo e devolve None.
+    resposta = falar_com_agente_texto(
+        montar_dados_ia(credenciais),
+        pergunta,
+        "CofreSeguro"
+    )
+
+    if resposta is None:
+        print("\nNão foi possível consultar a IA.")
+
+    else:
+        # A resposta só é mostrada na tela. Nada que a IA diz altera o cofre.
+        print("\nA resposta é gerada por IA e pode conter erros.")
+        print("A classificação oficial das senhas é a do relatório (opção 4).")
+
+    pausar()
+
 def menu_principal():
+    criar_categorias_padrao()
+
     while True:
         limpar_tela()
 
@@ -426,46 +524,58 @@ def menu_principal():
             "\nDigite o número da opção desejada: "
         )
 
-        if opcao == "0":
-            print("\nSaindo do Cofre Seguro...")
-            break
+        # Erro de arquivo (sem permissão, disco cheio, CSV com acento estragado)
+        # cai aqui em vez de fechar o programa. Como a exceção interrompe a
+        # operação no meio, nada é salvo pela metade.
+        try:
+            if opcao == "0":
+                print("\nSaindo do Cofre Seguro...")
+                break
 
-        elif opcao == "1":
-            menu_credenciais()
+            elif opcao == "1":
+                menu_credenciais()
 
-        elif opcao == "2":
-            menu_categorias()
+            elif opcao == "2":
+                menu_categorias()
 
-        elif opcao == "3":
-            menu_gerador_senha()
+            elif opcao == "3":
+                menu_gerador_senha()
 
-        elif opcao == "4":
-            menu_relatorio()
-            
-        elif opcao == "5":
-            menu_auditoria()
+            elif opcao == "4":
+                menu_relatorio()
 
-        elif opcao == "6":
-            limpar_tela()
-            print("Perguntar à IA em construção...")
+            elif opcao == "5":
+                menu_auditoria()
+
+            elif opcao == "6":
+                menu_ia()
+
+            else:
+                print("\nOpção inválida!")
+                pausar()
+
+        except (OSError, UnicodeDecodeError) as erro:
+            print(f"\nErro ao acessar os arquivos de dados: {erro}")
             pausar()
 
-        else:
-            print("\nOpção inválida!")
-            pausar()
+if __name__ == "__main__":
+    # Ctrl+C ou fim da entrada encerram o programa sem mostrar o erro do Python
+    try:
+        while True:
+            app = input(
+                "Deseja acessar o Cofre Seguro? (Digite sim ou não): "
+            ).lower().strip()
 
-while True:
-    app = input(
-        "Deseja acessar o Cofre Seguro? (Digite sim ou não): "
-    ).lower().strip()
+            if app == "sim":
+                menu_principal()
+                break
 
-    if app == "sim":
-        menu_principal()
-        break
+            elif app == "não" or app == "nao":
+                print("Encerrando o programa...")
+                break
 
-    elif app == "não" or app == "nao":
-        print("Encerrando o programa...")
-        break
+            else:
+                print("Resposta inválida. Digite sim ou não.")
 
-    else:
-        print("Resposta inválida. Digite sim ou não.")
+    except (KeyboardInterrupt, EOFError):
+        print("\nPrograma encerrado.")

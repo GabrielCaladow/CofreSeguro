@@ -8,6 +8,7 @@ def dias_desde(data_texto):
     """Dias desde a data (aceita 'dd/mm/aaaa' ou 'dd/mm/aaaa hh:mm').
     Retorna None se a data estiver vazia ou inválida."""
     try:
+        # [:10] pega só "dd/mm/aaaa" e joga fora a hora, se tiver
         data = datetime.strptime(data_texto[:10], "%d/%m/%Y").date()
     except (ValueError, TypeError):
         return None

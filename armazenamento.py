@@ -10,6 +10,11 @@ arquivo_credenciais = os.path.join(
     "credenciais.csv"
 )
 
+arquivo_categorias = os.path.join(
+    pasta_dados,
+    "categorias.csv"
+)
+
 campos_credenciais = [
     "servico",
     "usuario",
@@ -18,6 +23,18 @@ campos_credenciais = [
     "observacoes",
     "data_alteracao"
 ]
+
+campos_categorias = ["nome", "forca_minima"]
+
+
+def limpar_campo(texto):
+    """Remove do texto os caracteres que quebrariam o formato do CSV."""
+    # Se sobrar um ";" dentro de um campo, a linha ganha uma coluna a mais
+    # e é descartada na próxima leitura, ou seja, o registro some.
+    texto = str(texto)
+    texto = texto.replace(";", ",")
+    texto = texto.replace("\n", " ").replace("\r", " ")
+    return texto.strip()
 
 
 def carregar_credenciais():
@@ -36,6 +53,7 @@ def carregar_credenciais():
     for linha in linhas[1:]:
         valores = linha.strip().split(";")
 
+        # linha com mais ou menos colunas que o cabeçalho está corrompida
         if len(valores) != len(cabecalho):
             continue
 
@@ -64,18 +82,13 @@ def salvar_credenciais(credenciais):
             valores = []
 
             for campo in campos_credenciais:
-                valor = str(credencial.get(campo, ""))
+                valor = limpar_campo(credencial.get(campo, ""))
                 valores.append(valor)
 
             arquivo.write(";".join(valores) + "\n")
 
 
 def carregar_categorias():
-    arquivo_categorias = os.path.join(
-        pasta_dados,
-        "categorias.csv"
-    )
-
     if not os.path.exists(arquivo_categorias):
         return []
 
@@ -107,21 +120,14 @@ def carregar_categorias():
 def salvar_categorias(categorias):
     os.makedirs(pasta_dados, exist_ok=True)
 
-    arquivo_categorias = os.path.join(
-        pasta_dados,
-        "categorias.csv"
-    )
-
-    campos = ["nome", "forca_minima"]
-
     with open(arquivo_categorias, "w", encoding="utf-8") as arquivo:
-        arquivo.write(";".join(campos) + "\n")
+        arquivo.write(";".join(campos_categorias) + "\n")
 
         for categoria in categorias:
             valores = []
 
-            for campo in campos:
-                valor = str(categoria.get(campo, ""))
+            for campo in campos_categorias:
+                valor = limpar_campo(categoria.get(campo, ""))
                 valores.append(valor)
 
             arquivo.write(";".join(valores) + "\n")

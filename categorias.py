@@ -3,8 +3,39 @@
 # CRUD de categorias e definição da força mínima de senha.
 from armazenamento import carregar_categorias, salvar_categorias
 
+# As categorias do enunciado, com a força mínima de 0 (muito fraca) a 4 (muito forte).
+# Banco e trabalho pedem mais porque um vazamento ali costuma dar mais prejuízo.
+categorias_padrao = [
+    ("Banco", 3),
+    ("Rede social", 2),
+    ("Estudo", 2),
+    ("Trabalho", 3),
+    ("Outros", 1)
+]
+
+
+def criar_categorias_padrao():
+    # Só roda na primeira vez. Se já tem categoria salva, não mexe em nada.
+    if carregar_categorias():
+        return
+
+    categorias = []
+
+    for nome, forca_minima in categorias_padrao:
+        categorias.append({
+            "nome": nome,
+            "forca_minima": str(forca_minima)
+        })
+
+    salvar_categorias(categorias)
+
 def cadastrar_categoria(nome, forca_minima):
     categorias = carregar_categorias()
+
+    nome = nome.strip()
+
+    if not nome:
+        return None
 
     for categoria in categorias:
         if categoria["nome"].lower() == nome.lower():

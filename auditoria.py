@@ -1,6 +1,7 @@
 # Responsável: João Felipe | Função 4 (Auditoria): gravar e consultar o log de auditoria.
 # O log é um arquivo CSV (separado por ";") em que cada linha é uma operação:
-#     data_hora;operacao;servico
+#     data_hora;operacao;servico;detalhe
+# O "detalhe" é opcional. Hoje só é usado para guardar a pergunta feita à IA.
 # O arquivo só recebe novas linhas no final (modo "append"): o programa nunca
 # edita nem apaga registros antigos. Por isso o log mostra o que foi FEITO,
 # e não apenas o estado atual das credenciais.
@@ -8,12 +9,12 @@
 
 import os
 
-from armazenamento import pasta_dados
+from armazenamento import pasta_dados, limpar_campo
 from tempo import agora_texto
 
 arquivo_log = os.path.join(pasta_dados, "auditoria.csv")
 
-campos_log = ["data_hora", "operacao", "servico"]
+campos_log = ["data_hora", "operacao", "servico", "detalhe"]
 
 OP_ADICIONAR = "ADICIONAR_CREDENCIAL"
 OP_EDITAR = "EDITAR_CREDENCIAL"
@@ -23,18 +24,12 @@ OP_CADASTRAR_CATEGORIA = "CADASTRAR_CATEGORIA"
 OP_EDITAR_CATEGORIA = "EDITAR_CATEGORIA"
 OP_GERAR_RELATORIO = "GERAR_RELATORIO"
 OP_GERAR_SENHA = "GERAR_SENHA"
+OP_PERGUNTAR_IA = "PERGUNTAR_IA"
 
 
-def limpar_campo(texto):
-    """Remove do texto os caracteres que quebrariam o formato do CSV."""
-    texto = str(texto)
-    texto = texto.replace(";", ",")
-    texto = texto.replace("\n", " ").replace("\r", " ")
-    return texto.strip()
-
-
-def registrar_operacao(operacao, servico="-"):
-    """Grava uma linha no log: data/hora, operação e serviço afetado.
+def registrar_operacao(operacao, servico="-", detalhe=""):
+    """Grava uma linha no log: data/hora, operação, serviço afetado e,
+    se houver, um detalhe (ex.: a pergunta feita à IA).
     Retorna True se gravou e False se não foi possível gravar."""
     try:
         os.makedirs(pasta_dados, exist_ok=True)
@@ -52,7 +47,8 @@ def registrar_operacao(operacao, servico="-"):
             linha = [
                 agora_texto(),
                 limpar_campo(operacao),
-                limpar_campo(servico) or "-"
+                limpar_campo(servico) or "-",
+                limpar_campo(detalhe)
             ]
             arquivo.write(";".join(linha) + "\n")
 
@@ -81,6 +77,10 @@ def carregar_log():
     # linhas[0] é o cabeçalho
     for linha in linhas[1:]:
         valores = linha.strip().split(";")
+
+        # logs antigos não tinham a coluna "detalhe", então aceitamos 3 colunas
+        if len(valores) == len(campos_log) - 1:
+            valores.append("")
 
         if len(valores) != len(campos_log):
             continue  # ignora linhas corrompidas
@@ -134,11 +134,16 @@ def formatar_log(registros):
     linhas.append("-" * (19 + 2 + largura_operacao + 2 + 20))
 
     for registro in registros:
-        linhas.append(
+        linha = (
             f"{registro['data_hora']:<19}  "
             f"{registro['operacao']:<{largura_operacao}}  "
             f"{registro['servico']}"
         )
+
+        if registro["detalhe"]:
+            linha += f"  ({registro['detalhe']})"
+
+        linhas.append(linha)
 
     linhas.append("")
     linhas.append(f"Total de registros: {len(registros)}")
