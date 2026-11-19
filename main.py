@@ -34,6 +34,10 @@ from auditoria import (
     OP_CADASTRAR_CATEGORIA
 )
 
+from gerador_senha import (
+    gerar_senha_aleatoria,
+    gerar_senha_palavra
+)
 
 def limpar_tela():
     os.system("cls" if os.name == "nt" else "clear")
@@ -367,6 +371,20 @@ def menu_auditoria():
             print("\nOpção inválida!")
             pausar()
 
+def menu_gerador_senha():
+    while True:
+        limpar_tela()
+        print("========== GERADOR DE SENHA ==========")
+        opcao=int(input("1. Senha aleatoria com palavra chave \n2. Senha 100%. aleatoria\n0. Voltar \nEscolha uma opção: "))
+        if opcao==2:
+            gerar_senha_aleatoria()
+        elif opcao==1:
+            gerar_senha_palavra()
+        elif opcao == 0:
+            break
+        else:
+            print("opção invalida!")
+        pausar()
 
 def menu_principal():
     while True:
@@ -396,9 +414,7 @@ def menu_principal():
             menu_categorias()
 
         elif opcao == "3":
-            limpar_tela()
-            print("Gerar senha forte em construção...")
-            pausar()
+            menu_gerador_senha()
 
         elif opcao == "4":
             limpar_tela()
