@@ -1,10 +1,7 @@
-
 # Responsável: Gabriel Calado | Função 2 (Dados)
-# CRUD de categorias e definição da força mínima de senha.
 from armazenamento import carregar_categorias, salvar_categorias
 
-# As categorias do enunciado, com a força mínima de 0 (muito fraca) a 4 (muito forte).
-# Banco e trabalho pedem mais porque um vazamento ali costuma dar mais prejuízo.
+# Força mínima de 0 (muito fraca) a 4 (muito forte). Banco e trabalho exigem mais.
 categorias_padrao = [
     ("Banco", 3),
     ("Rede social", 2),
@@ -15,7 +12,6 @@ categorias_padrao = [
 
 
 def criar_categorias_padrao():
-    # Só roda na primeira vez. Se já tem categoria salva, não mexe em nada.
     if carregar_categorias():
         return
 

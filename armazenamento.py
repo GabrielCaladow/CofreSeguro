@@ -28,9 +28,7 @@ campos_categorias = ["nome", "forca_minima"]
 
 
 def limpar_campo(texto):
-    """Remove do texto os caracteres que quebrariam o formato do CSV."""
-    # Se sobrar um ";" dentro de um campo, a linha ganha uma coluna a mais
-    # e é descartada na próxima leitura, ou seja, o registro some.
+    # Um ";" dentro do campo criaria uma coluna a mais e a linha seria descartada na leitura.
     texto = str(texto)
     texto = texto.replace(";", ",")
     texto = texto.replace("\n", " ").replace("\r", " ")
@@ -53,7 +51,6 @@ def carregar_credenciais():
     for linha in linhas[1:]:
         valores = linha.strip().split(";")
 
-        # linha com mais ou menos colunas que o cabeçalho está corrompida
         if len(valores) != len(cabecalho):
             continue
 

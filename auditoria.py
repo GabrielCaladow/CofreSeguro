@@ -1,11 +1,6 @@
 # Responsável: João Felipe | Função 4 (Auditoria): gravar e consultar o log de auditoria.
-# O log é um arquivo CSV (separado por ";") em que cada linha é uma operação:
-#     data_hora;operacao;servico;detalhe
-# O "detalhe" é opcional. Hoje só é usado para guardar a pergunta feita à IA.
-# O arquivo só recebe novas linhas no final (modo "append"): o programa nunca
-# edita nem apaga registros antigos. Por isso o log mostra o que foi FEITO,
-# e não apenas o estado atual das credenciais.
-# A senha NUNCA é gravada no log, apenas o nome do serviço afetado.
+# O log só recebe linhas novas no final (modo "a"): nada é editado ou apagado,
+# então ele guarda o histórico do que foi feito. A senha nunca é gravada.
 
 import os
 
@@ -28,13 +23,9 @@ OP_PERGUNTAR_IA = "PERGUNTAR_IA"
 
 
 def registrar_operacao(operacao, servico="-", detalhe=""):
-    """Grava uma linha no log: data/hora, operação, serviço afetado e,
-    se houver, um detalhe (ex.: a pergunta feita à IA).
-    Retorna True se gravou e False se não foi possível gravar."""
     try:
         os.makedirs(pasta_dados, exist_ok=True)
 
-        # Cria o cabeçalho apenas se o arquivo ainda não existe ou está vazio
         precisa_cabecalho = (
             not os.path.exists(arquivo_log)
             or os.path.getsize(arquivo_log) == 0
@@ -60,8 +51,6 @@ def registrar_operacao(operacao, servico="-", detalhe=""):
 
 
 def carregar_log():
-    """Lê o arquivo de log e devolve uma lista de dicionários
-    (do mais antigo para o mais recente)."""
     if not os.path.exists(arquivo_log):
         return []
 
@@ -74,7 +63,6 @@ def carregar_log():
 
     registros = []
 
-    # linhas[0] é o cabeçalho
     for linha in linhas[1:]:
         valores = linha.strip().split(";")
 
@@ -83,7 +71,7 @@ def carregar_log():
             valores.append("")
 
         if len(valores) != len(campos_log):
-            continue  # ignora linhas corrompidas
+            continue
 
         registro = {}
 
@@ -96,8 +84,6 @@ def carregar_log():
 
 
 def consultar_log(filtro_operacao="", filtro_servico=""):
-    """Devolve os registros do log. Os filtros são opcionais e não
-    diferenciam maiúsculas de minúsculas (busca por trecho do texto)."""
     filtro_operacao = filtro_operacao.strip().lower()
     filtro_servico = filtro_servico.strip().lower()
 
@@ -116,7 +102,6 @@ def consultar_log(filtro_operacao="", filtro_servico=""):
 
 
 def formatar_log(registros):
-    """Monta o texto do log em formato de tabela, pronto para imprimir."""
     linhas = []
     linhas.append("=== LOG DE AUDITORIA ===")
     linhas.append("")

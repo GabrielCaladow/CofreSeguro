@@ -6,8 +6,7 @@ from tempo import dias_desde
  
  
 def encontrar_senhas_repetidas(credenciais, chave_senha, chave_nome):
-    # agrupa os serviços pela senha: {senha: [serviço1, serviço2, ...]}.
-    # O defaultdict cria a lista vazia sozinho na primeira vez que a senha aparece.
+    # {senha: [serviços que usam essa senha]}
     grupos = defaultdict(list)
     for c in credenciais:
         grupos[c[chave_senha]].append(c[chave_nome])
@@ -33,7 +32,7 @@ def calcular_tempo_sem_alterar(credenciais, chave_nome, chave_data, funcao_dias)
             return None
  
     resultado = [(c[chave_nome], dias(c)) for c in credenciais]
-    # mais antigas primeiro; as sem data (None) vão para o fim da lista
+    # mais antigas primeiro; sem data (None) no fim
     resultado.sort(key=lambda item: (item[1] is None, -(item[1] or 0)))
     return resultado
  
@@ -103,14 +102,8 @@ def relatorio_de_seguranca():
 
 
 def montar_dados_ia(credenciais):
-    # Monta o texto que vai para a IA. Só entra o que é preciso para responder
-    # perguntas sobre segurança. Ficam de fora:
-    #   - senha: é o dado sensível, e uma vez enviada não tem como "desenviar"
-    #   - usuário/e-mail: dado pessoal que a IA não precisa
-    #   - observações: texto livre, onde dá para esconder uma ordem para a IA
-    #     (injeção de prompt). Se não vai, não tem como ser obedecido.
-    # A força, a repetição e a lista de comuns são calculadas aqui, no nosso
-    # código, então a IA recebe a conclusão pronta e não a senha.
+    # Senha, usuário e observações não vão para a IA: a senha é o dado sensível e as
+    # observações são texto livre, onde caberia uma injeção de prompt.
     repetidas = encontrar_senhas_repetidas(credenciais, "senha", "servico")
     comuns = encontrar_senhas_comuns(credenciais, "senha", "servico", senhas_comuns)
 
@@ -123,7 +116,6 @@ def montar_dados_ia(credenciais):
                 mesma_senha = [nome for nome in grupo if nome != c["servico"]]
 
         dias = dias_desde(c["data_alteracao"])
-        # tira o "Senha " e os "!!" do nome do nível: "Senha Fraca!!" vira "Fraca"
         forca = niveis[obter_nivel_senha(c["senha"])].replace("Senha ", "").strip("!")
 
         linhas.append(";".join([

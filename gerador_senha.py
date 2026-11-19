@@ -8,8 +8,7 @@ def gerar_senha_palavra():
     palavra_chave=input("Qual sua palavra chave: ")
     numero=str(random.randint(100,999))
     simbolo="!@#$%^&*_-+="
-    # sample não repete, então os 2 símbolos sempre são diferentes
     simbolo_aleatorio="".join(random.sample(simbolo, 2))
-    # troca letras por números/símbolos parecidos (a vira @, e vira 3...) e põe 3 números no fim
+    # troca letras por símbolos parecidos (a vira @, e vira 3...)
     senha_palavra=simbolo_aleatorio+palavra_chave.lower().replace("a", "@").replace("e", "3").replace("i", "1").replace("o", "0").replace("s", "$").replace("t", "7")+numero
     print(f"Sua senha é: {senha_palavra}")

@@ -4,15 +4,13 @@ import string
 
 niveis = ["Senha muito fraca!!", "Senha Fraca!!", "Senha Média!!", "Senha Forte!!", "Senha muito forte!!"]
 
-# Abaixo de 8 caracteres a senha é muito fraca não importa o que tenha nela.
-# Com 14 ou mais ela pode chegar a Forte ou Muito forte; antes disso fica no máximo Média.
+# Menos de 8 caracteres: muito fraca. Menos de 14: no máximo Média.
 tamanho_minimo = 8
 tamanho_forte = 14
 
 def carregar_lista(caminho):
     try:
         with open(caminho, "r", encoding="utf8") as arquivo:
-            # set em vez de lista porque são 10 mil senhas e o "in" num set é instantâneo
             return {linha.strip().lower() for linha in arquivo}
     except FileNotFoundError:
         return set()
@@ -34,8 +32,7 @@ def verificador_numeros(senha):
 def verificador_pontuacao(senha):
     return any(caractere in string.punctuation for caractere in senha)
 
-# O caminho sai da pasta deste arquivo. Com só "senhas_comuns.txt", a lista
-# vinha vazia sempre que o programa era rodado de outra pasta.
+# Caminho a partir deste arquivo, para a lista carregar rodando o programa de qualquer pasta.
 senhas_comuns = carregar_lista(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "senhas_comuns.txt")
 )
@@ -110,15 +107,13 @@ def main():
 def obter_nivel_senha(senha):
     pontos, criterios, explicacao = avaliar_senha(senha)
 
-    # Senhas comuns sempre são consideradas muito fracas.
     if "Senha comum" in criterios:
         return 0
 
     if len(senha) < tamanho_minimo:
         return 0
 
-    # São 5 critérios para 5 níveis (0 a 4): com todos atendidos é 4,
-    # e cada critério que falta desce um nível.
+    # 5 critérios para 5 níveis (0 a 4): cada critério que falta desce um nível.
     nivel = max(pontos - 1, 0)
 
     if not verificador_tamanho(senha):

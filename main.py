@@ -1,5 +1,4 @@
 # Responsável: Heitor | Função 1 (Interface e Integração)
-# Menu principal, submenus, telas e chamada dos outros módulos.
 
 import os
 
@@ -57,9 +56,7 @@ def pausar():
 
 
 def ler_senha(mensagem):
-    # A senha não pode ser "limpa" na hora de salvar como os outros campos,
-    # senão o usuário cadastraria uma senha e o arquivo guardaria outra.
-    # Por isso o ";" é recusado já na digitação.
+    # O ";" é recusado aqui porque, se fosse trocado ao salvar, a senha gravada mudaria.
     while True:
         senha = input(mensagem)
 
@@ -74,7 +71,6 @@ def ler_senha(mensagem):
 
 
 def ler_categoria(mensagem):
-    # Só aceita categoria cadastrada, porque é dela que vem a força mínima.
     while True:
         nome_categoria = input(mensagem)
         categoria = buscar_categoria(nome_categoria)
@@ -414,7 +410,6 @@ def menu_gerador_senha():
     while True:
         limpar_tela()
         print("========== GERADOR DE SENHA ==========")
-        # compara como texto: com int(input()) qualquer letra derrubava o programa
         opcao=input("1. Senha aleatoria com palavra chave \n2. Senha 100%. aleatoria\n0. Voltar \nEscolha uma opção: ")
         if opcao=="2":
             gerar_senha_aleatoria()
@@ -483,12 +478,10 @@ def menu_ia():
         pausar()
         return
 
-    # Registra antes de enviar: se a consulta falhar no meio do caminho,
-    # o log ainda mostra que alguém tentou mandar os dados para fora.
+    # Registrado antes do envio, para constar no log mesmo se a consulta falhar.
     registrar_operacao(OP_PERGUNTAR_IA, "-", pergunta)
 
-    # O agente já trata falta de chave, falta da biblioteca groq e erro de
-    # internet: nesses casos ele mostra o motivo e devolve None.
+    # Sem chave, sem a biblioteca ou sem internet, o agente avisa e devolve None.
     resposta = falar_com_agente_texto(
         montar_dados_ia(credenciais),
         pergunta,
@@ -499,7 +492,6 @@ def menu_ia():
         print("\nNão foi possível consultar a IA.")
 
     else:
-        # A resposta só é mostrada na tela. Nada que a IA diz altera o cofre.
         print("\nA resposta é gerada por IA e pode conter erros.")
         print("A classificação oficial das senhas é a do relatório (opção 4).")
 
@@ -524,9 +516,7 @@ def menu_principal():
             "\nDigite o número da opção desejada: "
         )
 
-        # Erro de arquivo (sem permissão, disco cheio, CSV com acento estragado)
-        # cai aqui em vez de fechar o programa. Como a exceção interrompe a
-        # operação no meio, nada é salvo pela metade.
+        # Um erro de arquivo cancela só a operação atual, sem fechar o programa.
         try:
             if opcao == "0":
                 print("\nSaindo do Cofre Seguro...")
@@ -559,7 +549,6 @@ def menu_principal():
             pausar()
 
 if __name__ == "__main__":
-    # Ctrl+C ou fim da entrada encerram o programa sem mostrar o erro do Python
     try:
         while True:
             app = input(
